@@ -2,7 +2,9 @@
 - hosts: all
   become: true
   pre_tasks:
+
   - name: install updates for ubuntu servers
+    tags: always
     ansible.builtin.apt:
       upgrade: yes
       update_cache: yes
@@ -11,18 +13,51 @@
 - hosts: web_servers
   become: true
   tasks:
-
   - name: install apache on web servers
+    tags: apache,ubuntu
     ansible.builtin.apt:
       name:
         - apache2
         - libapache2-mod-php
     when: ansible_distribution == "Ubuntu"
 
+  - name: ensure apache is running (ubuntu)
+    tags: apache,ubuntu
+    ansible.builtin.service:
+      name: apache2
+      state: started
+    when: ansible_distribution == "Ubuntu"
+
+  - name: copy HTML for site
+    tags: apache,ubuntu
+    ansible.builtin.copy:
+      src: default_site.html
+      dest: /var/www/html/index.html
+      owner: root
+      group: root
+      mode: 0644
+
+  - name: change website site
+    tags: apache,ubuntu
+    ansible.builtin.lineinfile:
+      path: /var/www/html/index.html
+      regexp: 'Learning Ansible!'
+      line: The information is a weapon and costs more than gold. Learning Ansible
+    when: ansible_distribution == "Ubuntu"
+    register: apache2
+
+  - name: restart apache (ubuntu)
+    tags: apache,ubuntu
+    ansible.builtin.service:
+      name: apache2
+      state: restarted
+    when: apache2.changed
+
 - hosts: db_servers
   become: true
   tasks:
     - name: install mysql server package on db servers
+      tags: db, ubuntu
       ansible.builtin.apt:
         name: mysql-server
         state: latest
