@@ -1,0 +1,30 @@
+---
+- hosts: all
+  become: true
+  pre_tasks:
+  - name: install updates for ubuntu servers
+    ansible.builtin.apt:
+      upgrade: yes
+      update_cache: yes
+    when: ansible_distribution == "Ubuntu"
+
+- hosts: web_servers
+  become: true
+  tasks:
+
+  - name: install apache on web servers
+    ansible.builtin.apt:
+      name:
+        - apache2
+        - libapache2-mod-php
+    when: ansible_distribution == "Ubuntu"
+
+- hosts: db_servers
+  become: true
+  tasks:
+    - name: install mysql server package on db servers
+      ansible.builtin.apt:
+        name: mysql-server
+        state: latest
+      when: ansible_distribution == "Ubuntu"
+
