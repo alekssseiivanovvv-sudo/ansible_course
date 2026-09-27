@@ -1,0 +1,30 @@
+- name: create user
+  tags: always
+  ansible.builtin.user:
+    name: Aleksei
+    groups: root
+
+- name: add sudoers file for Aleksei
+  tags: always
+  ansible.builtin.copy:
+    src: sudoers_Aleksei
+    dest: /etc/sudoers.d/Aleksei
+    owner: root
+    group: root
+    mode: 0440
+
+- name: add ssh key for Aleksei User
+  tags: always
+  ansible.builtin.authorized_key:
+    user: Aleksei
+    key: "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIIhJL0ky3dKXn2Jmq/EV9fPuKKbs93v0tOk8DC5V26aU lex@ws-u"
+
+- name: configure openssh based on template
+  ansible.builtin.template:
+    src: "{{ ssh_template_file }}"
+    destination: /etc/ssh/sshd_config
+    owner: root
+    group: root
+    moder: 0644
+  notify: restart_sshd
+
