@@ -84,3 +84,18 @@
         state: latest
       when: ansible_distribution == "Ubuntu"
 
+- hosts: all
+  become: true
+  roles:
+    - base
+
+- hosts: db_servers
+  become: true
+  roles:
+    - db_servers
+
+- hosts: web_servers
+  become: true
+  roles:
+    - web_servers
+
